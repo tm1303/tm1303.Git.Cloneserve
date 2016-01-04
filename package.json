@@ -1,0 +1,27 @@
+{
+  "name": "tm1303.Git.Cloneserve",
+  "version": "0.0.0",
+  "description": "NodeJS app to aid discover ability of GIT folder on a local network file system",
+  "main": "Cloneserve/server.js",
+  "dependencies": {
+    "fs": "^0.0.2",
+    "path": "^0.12.7",
+    "supplant": "^0.2.0",
+    "request": "^2.67.0",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tm1303/tm1303.Git.Cloneserve.git"
+  },
+  "author": "Tom Maxwell (tm1303)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tm1303/tm1303.Git.Cloneserve/issues"
+  },
+  "homepage": "https://github.com/tm1303/tm1303.Git.Cloneserve"
+}
