@@ -16,7 +16,6 @@ function handleRequest(request, response){
 	if( request.url.indexOf('favicon.ico') > -1)
 	{
 		response.end();
-		//console.log('facicon request cancelled');
 		return;
 	}
 	
@@ -30,7 +29,6 @@ function handleRequest(request, response){
 		});
 
 		var readStream = fs.createReadStream('ui.js');
-		// We replaced all the event handlers with a simple call to readStream.pipe()
 		readStream.pipe(response);
 		return;
 	}
@@ -42,37 +40,48 @@ function handleRequest(request, response){
 	if( queryData.subfolder)
 	{
 		subfolder = queryData.subfolder;
-		console.log(subfolder);
 	}
+	console.log("search path: /"+subfolder);
 	
 	var searchPath = GITPATH + '\\' + subfolder;
 	
-	fs.readdir(searchPath, function (err, data) {
-		console.log('search path: ' + searchPath);
-		if (err) throw err;
-	  
-		data = data.filter(function(file) {
+	var data = fs.readdirSync(searchPath);
+	
+		var innerData = data.filter(function(file) {
 			return fs.statSync(path.join(searchPath, file)).isDirectory();
 		});	
 
-		data.forEach(function(entry) {
-			if(entry.indexOf('.git') > -1) {
-				response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
-			} else {
-				response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
-			}
-			//console.log(entry);
-		});		
-		response.end();	
-	});
+		if(innerData.length===0)
+		{
+			response.write("is empty");
+			response.end();	
+		}
 		
-	//var queryData = request.url.parse(request.url, true).query;		
+		for (i = 0; i < innerData.length; i++) { 
+    			
+			var entry = innerData[i];
+			var foundPath = searchPath + '\\' + entry;			
+			
+			var subData =fs.readdirSync(foundPath);
+			
+				var hasGit = subData.some(function(subFile) {
+					return fs.statSync(path.join(foundPath, subFile)).isDirectory() && (subFile === ".git");
+				});
+				
+				if(hasGit){
+					response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
+				} else {
+					response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));					
+				};										
+		};
+				
+	response.end();	
 }
 
 //Create a server
 var server = http.createServer(handleRequest);
 
-//Lets start our server
+//Start server
 server.listen(PORT, function(){
 	console.log("Server listening on port: %s", PORT);
 });	
