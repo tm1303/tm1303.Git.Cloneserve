@@ -53,7 +53,7 @@ function handleRequest(request, response){
 
 		if(innerData.length===0)
 		{
-			response.write("is empty");
+			response.write(". is empty");
 			response.end();	
 		}
 		
@@ -64,11 +64,11 @@ function handleRequest(request, response){
 			
 			var subData =fs.readdirSync(foundPath);
 			
-				var hasGit = subData.some(function(subFile) {
-					return fs.statSync(path.join(foundPath, subFile)).isDirectory() && (subFile === ".git");
+				var hasHeadFile = subData.some(function(subFile) {
+					return fs.statSync(path.join(foundPath, subFile)).isFile() && (subFile === "HEAD");
 				});
 				
-				if(hasGit){
+				if(hasHeadFile){
 					response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
 				} else {
 					response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));					
