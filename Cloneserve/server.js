@@ -51,11 +51,18 @@ function handleRequest(request, response){
 	}
 	
 	var subfolder ='';
+	var jsonData;
+	var nodeCollection;
 	var queryData = url.parse(request.url, true).query;
-	if( queryData.subfolder)
+	if( queryData.id && queryData.id!='#')
 	{
-		subfolder = queryData.subfolder;
-		console.log(subfolder);
+		subfolder = queryData.id;
+		console.log(subfolder);		
+		jsonData =  [];
+		nodeCollection = jsonData;
+	} else {
+		jsonData = {"text" : "Git Root", "children" : []};
+		nodeCollection = jsonData['children'];
 	}
 	
 	var searchPath = GITPATH + '\\' + subfolder;
@@ -67,15 +74,13 @@ function handleRequest(request, response){
 		data = data.filter(function(file) {
 			return fs.statSync(path.join(searchPath, file)).isDirectory();
 		});	
-
-		var jsonData = {"text" : "Git Root", "children" : []};
 				
 		data.forEach(function(entry) {
 			if(entry.indexOf('.git') > -1) {
-				jsonData['children'].push({'text' : entry, 'icon' : 'jstree-file'});
+				nodeCollection.push({'text' : entry, 'icon' : 'jstree-file'});
 				//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
 			} else {				
-				jsonData['children'].push({'text' : entry, 'children' : true});
+				nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
 				//response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
 			}
 			//console.log(entry);
