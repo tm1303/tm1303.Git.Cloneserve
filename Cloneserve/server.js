@@ -35,7 +35,20 @@ function handleRequest(request, response){
 		return;
 	}
 	
-	response.write('<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js" type="text/javascript"></script><script src="ui.js"></script>');
+	if( request.url.indexOf('index.html') > -1)
+	{
+		var stat = fs.statSync('index.html');
+
+		response.writeHead(200, {
+			'Content-Type': 'text/html',
+			'Content-Length': stat.size
+		});
+
+		var readStream = fs.createReadStream('index.html');
+		// We replaced all the event handlers with a simple call to readStream.pipe()
+		readStream.pipe(response);
+		return;
+	}
 	
 	var subfolder ='';
 	var queryData = url.parse(request.url, true).query;
@@ -55,15 +68,21 @@ function handleRequest(request, response){
 			return fs.statSync(path.join(searchPath, file)).isDirectory();
 		});	
 
+		var jsonData = {"text" : "Git Root", "children" : []};
+				
 		data.forEach(function(entry) {
 			if(entry.indexOf('.git') > -1) {
-				response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
-			} else {
-				response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
+				jsonData['children'].push({'text' : entry, 'icon' : 'jstree-file'});
+				//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
+			} else {				
+				jsonData['children'].push({'text' : entry, 'children' : true});
+				//response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
 			}
 			//console.log(entry);
 		});		
-		response.end();	
+		
+		response.setHeader('Content-Type', 'json')
+		response.end(JSON.stringify(jsonData));
 	});
 		
 	//var queryData = request.url.parse(request.url, true).query;		

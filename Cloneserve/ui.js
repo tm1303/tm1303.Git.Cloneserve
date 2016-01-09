@@ -2,6 +2,18 @@
 
 $(function(){
 
+	
+	$('#tree_view').jstree({
+		'core' : {
+		  'data' : {
+			"url" : ".",
+			"data" : function (node) {
+			  return { "id" : node.id };
+			}
+		  }
+		}
+	  });	
+
 	$('.js-textareacopybtn').on("click", function(){
 		
 		$(this).parent().find('textarea').select();
