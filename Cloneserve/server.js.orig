@@ -43,6 +43,7 @@ function handleRequest(request, response){
 		});
 
 		var readStream = fs.createReadStream('index.html');
+		// We replaced all the event handlers with a simple call to readStream.pipe()
 		readStream.pipe(response);
 		return;
 	}
@@ -53,6 +54,9 @@ function handleRequest(request, response){
 	var queryData = url.parse(request.url, true).query;
 	if( queryData.id && queryData.id!='#')
 	{
+<<<<<<< HEAD
+		subfolder = queryData.subfolder;
+=======
 		subfolder = queryData.id;
 		console.log(subfolder);		
 		jsonData =  [];
@@ -60,6 +64,7 @@ function handleRequest(request, response){
 	} else {
 		jsonData = {"text" : "Git Root", "children" : []};
 		nodeCollection = jsonData['children'];
+>>>>>>> jstree
 	}
 	console.log("search path: /"+subfolder);
 	
@@ -67,34 +72,59 @@ function handleRequest(request, response){
 	
 	var data = fs.readdirSync(searchPath);
 	
-	var innerData = data.filter(function(file) {
-		return fs.statSync(path.join(searchPath, file)).isDirectory();
-	});	
+		var innerData = data.filter(function(file) {
+			return fs.statSync(path.join(searchPath, file)).isDirectory();
+		});	
+<<<<<<< HEAD
 
-	if(innerData.length===0)
-	{
-		response.write(". is empty");
-		response.end();	
-		return;
-	}
-	for (i = 0; i < innerData.length; i++) { 
-			
-		var entry = innerData[i];
-		if(entry.indexOf('.git') > -1) {
-			nodeCollection.push({'text' : entry, 'icon' : 'jstree-file', 'id' : subfolder + '\\' + entry});
-			//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
-		} else {				
-			nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
-			//response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
+		if(innerData.length===0)
+		{
+			response.write(". is empty");
+			response.end();	
 		}
-	};		
-	
-	response.setHeader('Content-Type', 'json')
-	response.end(JSON.stringify(jsonData));
+=======
+				
+		data.forEach(function(entry) {
+			if(entry.indexOf('.git') > -1) {
+				nodeCollection.push({'text' : entry, 'icon' : 'jstree-file', 'id' : subfolder + '\\' + entry});
+				//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
+			} else {				
+				nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
+				//response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
+			}
+			//console.log(entry);
+		});		
+		
+		response.setHeader('Content-Type', 'json')
+		response.end(JSON.stringify(jsonData));
+	});
+>>>>>>> jstree
+		
+		for (i = 0; i < innerData.length; i++) { 
+    			
+			var entry = innerData[i];
+			var foundPath = searchPath + '\\' + entry;			
+			
+			var subData =fs.readdirSync(foundPath);
+			
+				var hasHeadFile = subData.some(function(subFile) {
+					return fs.statSync(path.join(foundPath, subFile)).isFile() && (subFile === "HEAD");
+				});
+				
+				if(hasHeadFile){
+					response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
+				} else {
+					response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));					
+				};										
+		};
+				
+	response.end();	
 }
 
+//Create a server
 var server = http.createServer(handleRequest);
 
+//Start server
 server.listen(PORT, function(){
 	console.log("Server listening on port: %s", PORT);
 });	
