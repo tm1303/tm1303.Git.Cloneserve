@@ -77,7 +77,7 @@ function handleRequest(request, response){
 				
 		data.forEach(function(entry) {
 			if(entry.indexOf('.git') > -1) {
-				nodeCollection.push({'text' : entry, 'icon' : 'jstree-file'});
+				nodeCollection.push({'text' : entry, 'icon' : 'jstree-file', 'id' : subfolder + '\\' + entry});
 				//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
 			} else {				
 				nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
