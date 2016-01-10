@@ -71,12 +71,12 @@ function handleRequest(request, response){
 		return fs.statSync(path.join(searchPath, file)).isDirectory();
 	});	
 
-	if(innerData.length===0)
-	{
-		response.write(". is empty");
-		response.end();	
-		return;
-	}
+	// if(innerData.length===0)
+	// {
+		// response.write(". is empty");
+		// response.end();	
+		// return;
+	// }
 	for (i = 0; i < innerData.length; i++) { 
 			
 		var entry = innerData[i];
