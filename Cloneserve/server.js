@@ -8,8 +8,7 @@ var url = require('url');
 const PORT=5001; 
 
 const GITPATH = 'c:\git'
-const CloneTemplate = '<p>Repo: <button class="js-textareacopybtn">Clone {{name}}</button><textarea class="js-copytextarea" style="width: 0px; position: absolute; top: -50px;">git clone gituser@tddev01:git{{path}}</textarea></p>';
-const DrillTemplate = '<p>Folder: <a href="?subfolder={{path}}">{{name}}</a></p>';
+const CloneTemplate = 'git clone gituser@tddev01:git{{path}}';
 
 function handleRequest(request, response){
 		
@@ -81,7 +80,12 @@ function handleRequest(request, response){
 			
 		var entry = innerData[i];
 		if(entry.indexOf('.git') > -1) {
-			nodeCollection.push({'text' : entry, 'icon' : 'jstree-file', 'id' : subfolder + '\\' + entry});
+			nodeCollection.push({
+				'text' : entry, 
+				'icon' : 'jstree-file', 
+				'id' : subfolder + '\\' + entry, 
+				'a_attr' : { 'data-clone' : 'git clone gituser@tddev01:git' + subfolder + '\\' + entry}
+			});
 			//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
 		} else {				
 			nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
