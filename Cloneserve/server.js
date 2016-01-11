@@ -31,70 +31,80 @@ function handleRequest(request, response){
 		readStream.pipe(response);
 		return;
 	}
-	
-	if( request.url.indexOf('index.html') > -1)
+		
+	if( request.url.indexOf('data') > -1)
 	{
-		var stat = fs.statSync('index.html');
+		var subfolder ='';
+		var jsonData;
+		var nodeCollection;
+		var queryData = url.parse(request.url, true).query;
+		if( queryData.id && queryData.id!='#')
+		{
+			subfolder = queryData.id;
+			console.log(subfolder);		
+			jsonData =  [];
+			nodeCollection = jsonData;
+		} else {
+			jsonData = {"text" : "Git Root", "children" : []};
+			nodeCollection = jsonData['children'];
+		}
+		console.log("search path: /"+subfolder);
+		
+		var searchPath = GITPATH + '\\' + subfolder;
+		
+		var data = fs.readdirSync(searchPath);
+		
+		var innerData = data.filter(function(file) {
+			return fs.statSync(path.join(searchPath, file)).isDirectory();
+		});	
 
-		response.writeHead(200, {
-			'Content-Type': 'text/html',
-			'Content-Length': stat.size
-		});
-
-		var readStream = fs.createReadStream('index.html');
-		readStream.pipe(response);
+		// if(innerData.length===0)
+		// {
+			// response.write(". is empty");
+			// response.end();	
+			// return;
+		// }
+		for (i = 0; i < innerData.length; i++) { 
+				
+			var entry = innerData[i];
+ 			var foundPath = searchPath + '\\' + entry;	
+			var subData =fs.readdirSync(foundPath);
+				
+			var hasHeadFile = subData.some(function(subFile) {
+				return fs.statSync(path.join(foundPath, subFile)).isFile() && (subFile === "HEAD");
+			});
+			
+			var entry = innerData[i];
+			if(hasHeadFile) {
+				nodeCollection.push({
+					'text' : entry, 
+					'icon' : 'jstree-file', 
+					'id' : subfolder + '\\' + entry, 
+					'a_attr' : { 'data-clone' : 'git clone gituser@tddev01:git' + subfolder + '\\' + entry}
+				});
+				//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
+			} else {				
+				nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
+				//response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
+			}
+		};		
+		
+		response.setHeader('Content-Type', 'json')
+		response.end(JSON.stringify(jsonData));
+		
 		return;
 	}
 	
-	var subfolder ='';
-	var jsonData;
-	var nodeCollection;
-	var queryData = url.parse(request.url, true).query;
-	if( queryData.id && queryData.id!='#')
-	{
-		subfolder = queryData.id;
-		console.log(subfolder);		
-		jsonData =  [];
-		nodeCollection = jsonData;
-	} else {
-		jsonData = {"text" : "Git Root", "children" : []};
-		nodeCollection = jsonData['children'];
-	}
-	console.log("search path: /"+subfolder);
-	
-	var searchPath = GITPATH + '\\' + subfolder;
-	
-	var data = fs.readdirSync(searchPath);
-	
-	var innerData = data.filter(function(file) {
-		return fs.statSync(path.join(searchPath, file)).isDirectory();
-	});	
+	// return index page
+	var stat = fs.statSync('index.html');
+	response.writeHead(200, {
+		'Content-Type': 'text/html',
+		'Content-Length': stat.size
+	});
 
-	// if(innerData.length===0)
-	// {
-		// response.write(". is empty");
-		// response.end();	
-		// return;
-	// }
-	for (i = 0; i < innerData.length; i++) { 
-			
-		var entry = innerData[i];
-		if(entry.indexOf('.git') > -1) {
-			nodeCollection.push({
-				'text' : entry, 
-				'icon' : 'jstree-file', 
-				'id' : subfolder + '\\' + entry, 
-				'a_attr' : { 'data-clone' : 'git clone gituser@tddev01:git' + subfolder + '\\' + entry}
-			});
-			//response.write(subs.text(CloneTemplate, {path : subfolder + '/' + entry, name : entry}));
-		} else {				
-			nodeCollection.push({'text' : entry, 'children' : true, 'id' : subfolder + '\\' + entry});
-			//response.write(subs.text(DrillTemplate, {path : subfolder + '\\' + entry, name : entry}));
-		}
-	};		
-	
-	response.setHeader('Content-Type', 'json')
-	response.end(JSON.stringify(jsonData));
+	var readStream = fs.createReadStream('index.html');
+	readStream.pipe(response);
+	return;
 }
 
 var server = http.createServer(handleRequest);
