@@ -7,8 +7,11 @@ var url = require('url');
 
 const PORT=5001; 
 
-const GITPATH = process.argv[2]; //'c:\git'
-const CloneTemplate = 'git clone gituser@tddev01:git{{path}}';
+var GITPATH = process.argv[2]; //'c:\git'
+var GITUSER = process.argv[3];
+var GITSERVER = process.argv[4];
+var GITCMDPATH = process.argv[5];
+var CloneTemplate = 'git clone '+GITUSER+'@'+GITSERVER+':'+GITCMDPATH+'{{path}}';
 
 function handleRequest(request, response){
 		

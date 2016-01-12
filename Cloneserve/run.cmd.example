@@ -1,1 +1,1 @@
-node server.js "c:\git"
+node server.js "c:\git" username servername pathFromSshRoot
