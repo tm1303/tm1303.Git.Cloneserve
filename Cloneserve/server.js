@@ -7,7 +7,7 @@ var url = require('url');
 
 const PORT=5001; 
 
-const GITPATH = 'c:\git'
+const GITPATH = process.argv[2]; //'c:\git'
 const CloneTemplate = 'git clone gituser@tddev01:git{{path}}';
 
 function handleRequest(request, response){
@@ -111,6 +111,7 @@ var server = http.createServer(handleRequest);
 
 server.listen(PORT, function(){
 	console.log("Server listening on port: %s", PORT);
+	console.log("Git root: %s", GITPATH);
 });	
 
 
